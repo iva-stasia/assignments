@@ -13,7 +13,7 @@ function displayStatistics() {
         'afterbegin',
         `
         <div>
-            <ul style='font-weight: bold; color: #004282; padding-left: 0; list-style: none;'>
+            <ul style='font-weight: bold; color: #004282; padding-left: 0; margin-top: 0; list-style: none;'>
                 <li>&#9989; Пройдено уроків: ${completedClassesCount}</li>
                 <li>&#8987; Залишилось уроків: ${
                     classesCount - completedClassesCount
