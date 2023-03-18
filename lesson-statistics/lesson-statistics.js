@@ -1,14 +1,22 @@
-displayStatistics();
+const timelineContainer = document.querySelector('.lessons-list-timeline');
+const classesCount = document.querySelectorAll('.lessons-timeline li').length;
+const completedClassesCount = document.querySelectorAll(
+    '.lessons-timeline a'
+).length;
+const unfinishedHomeworksCount = document.querySelectorAll(
+    '.lessons-timeline__item-link--danger'
+).length;
+const uncheckedHomeworksCount = document.querySelectorAll(
+    '.lessons-timeline__item-link--warning'
+).length;
 
-function displayStatistics() {
-    const timelineContainer = document.querySelector('.lessons-list-timeline');
-    const classesCount = document.querySelectorAll(
-        '.lessons-timeline li'
-    ).length;
-    const completedClassesCount = document.querySelectorAll(
-        '.lessons-timeline a'
-    ).length;
+displayStatistics(timelineContainer, classesCount, completedClassesCount);
 
+function displayStatistics(
+    timelineContainer,
+    classesCount,
+    completedClassesCount
+) {
     timelineContainer.insertAdjacentHTML(
         'afterbegin',
         `
@@ -18,21 +26,20 @@ function displayStatistics() {
                 <li>&#8987; Залишилось уроків: ${
                     classesCount - completedClassesCount
                 }</li>
-                ${generateHomeworkStatus()}
+                ${generateHomeworkStatus(
+                    unfinishedHomeworksCount,
+                    uncheckedHomeworksCount
+                )}
             </ul>
         </div>
     `
     );
 }
 
-function generateHomeworkStatus() {
-    const unfinishedHomeworksCount = document.querySelectorAll(
-        '.lessons-timeline__item-link--danger'
-    ).length;
-    const uncheckedHomeworksCount = document.querySelectorAll(
-        '.lessons-timeline__item-link--warning'
-    ).length;
-
+function generateHomeworkStatus(
+    unfinishedHomeworksCount,
+    uncheckedHomeworksCount
+) {
     if (uncheckedHomeworksCount && unfinishedHomeworksCount) {
         return `
             <li>&#128221; Домашок на перевірці: ${uncheckedHomeworksCount}</li>
