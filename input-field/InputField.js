@@ -1,22 +1,18 @@
-class InputField {
-    constructor(selector) {
-        this.input = document.querySelector(selector);
-    }
+function InputField(selector) {
+    this.input = document.querySelector(selector);
+    this.value = this.input.value;
+}
 
-    get value() {
-        return this.input.value;
-    }
+InputField.prototype.setValue = function (value) {
+    this.input.value = value;
+    this.value = value;
+};
 
-    set setValue(value) {
-        this.input.value = value;
-    }
+InputField.prototype.isEmpty = function () {
+    return this.input.value == '';
+};
 
-    isEmpty() {
-        return this.input.value == '';
-    }
-
-    isPhone() {
-        const phone = /^((\+38)?||(38)?)([0-9-]{10})$/;
-        return phone.test(this.value);
-    }
+InputField.prototype.isPhone = function () {
+    const phone = /^((\+38)?||(38)?)([0-9-]{10})$/;
+    return phone.test(this.value);
 }
