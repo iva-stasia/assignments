@@ -15,4 +15,4 @@ InputField.prototype.isEmpty = function () {
 InputField.prototype.isPhone = function () {
     const phone = /^((\+38)?||(38)?)([0-9-]{10})$/;
     return phone.test(this.value);
-}
+};
