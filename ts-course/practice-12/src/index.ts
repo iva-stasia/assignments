@@ -1,11 +1,11 @@
 // Візьміть декоратор DeprecatedMethod і навчіть його працювати з об'єктом, який вміє приймати причину,
 // через яку його не варто використовувати, і назву методу, яким його можна замінити, якщо це можливо.
 
-function DeprecatedMethod(reason: string, replacement?: string) {
-  return function <T, A extends any[], R>(
-    originalMethod: (...args: A) => R,
-    context: ClassMethodDecoratorContext
-  ): (this: T, ...args: A) => R {
+function DeprecatedMethod(
+  reason: string,
+  replacement?: string
+): <T, A extends any[], R>(originalMethod: (...args: A) => R, context: ClassMethodDecoratorContext) => (this: T, ...args: A) => R {
+  return function <T, A extends any[], R>(originalMethod: (...args: A) => R, context: ClassMethodDecoratorContext): (this: T, ...args: A) => R {
     function replacementMethod(this: T, ...args: A): R {
       console.log(
         `Method '${String(context.name)}' is deprecated due to ${reason}.${
@@ -22,8 +22,8 @@ function DeprecatedMethod(reason: string, replacement?: string) {
 // Створіть декоратори поля MinLength, MaxLength та Email.
 // Використайте попередню версію декораторів і зробіть так, щоб їх можно було використовувати разом.
 
-function MinLength(minValue: number) {
-  return function <T extends {}>(target: T, propertyKey: string | symbol) {
+function MinLength(minValue: number): <T extends {}>(target: T, propertyKey: string | symbol) => void {
+  return function <T extends {}>(target: T, propertyKey: string | symbol): void {
     let value: string;
     const descriptor = Object.getOwnPropertyDescriptor(target, propertyKey);
 
@@ -60,8 +60,8 @@ function MinLength(minValue: number) {
   };
 }
 
-function MaxLength(maxValue: number) {
-  return function <T extends {}>(target: T, propertyKey: string | symbol) {
+function MaxLength(maxValue: number): <T extends {}>(target: T, propertyKey: string | symbol) => void {
+  return function <T extends {}>(target: T, propertyKey: string | symbol): void {
     let value: string;
     const descriptor = Object.getOwnPropertyDescriptor(target, propertyKey);
 
@@ -98,7 +98,7 @@ function MaxLength(maxValue: number) {
   };
 }
 
-function Email<T extends {}>(target: T, propertyKey: string | symbol) {
+function Email<T extends {}>(target: T, propertyKey: string | symbol): void {
   let value: string;
 
   const descriptor = Object.getOwnPropertyDescriptor(target, propertyKey);
