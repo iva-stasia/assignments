@@ -1,43 +1,39 @@
 interface ITodoList {
-  addNote: (note: TodoNote) => void;
+  addNote: (note: ITodoNote) => void;
   removeNote: (noteId: string) => void;
-  editNote: (noteId: string, title?: string, content?: string) => void;
-  getNoteInfo: (noteId: string) => ITodoNoteInfo;
-  getAllNotes: () => ITodoNoteInfo[];
+  editNote: (noteId: string, payload: ITodoNote) => void;
+  getNoteInfo: (noteId: string) => ITodoNote;
+  getAllNotes: () => ITodoNote[];
   markNoteAsCompleted: (noteId: string) => void;
   getTotalNotesNum: () => number;
   getUncompletedNotesNum: () => number;
 }
 
 interface ISearchableTodoList extends ITodoList {
-  searchNotes: (query: string, field?: keyof TodoNote) => TodoNote[];
+  searchNotes: (query: string, field?: keyof ITodoNote) => ITodoNote[];
 }
 
 interface ISortableTodoList extends ITodoList {
-  sortNotesByStatus: () => TodoNote[];
-  sortNotesByCreationDate: () => TodoNote[];
+  sortNotesByStatus: () => ITodoNote[];
+  sortNotesByCreationDate: () => ITodoNote[];
 }
 
 type TodoNoteStatus = "completed" | "uncompleted";
 
-interface ITodoNoteInfo {
+interface ITodoNote {
   id: string;
+  status: TodoNoteStatus;
+  createdAt: Date;
   title: string;
   content: string;
-  createdAt: Date;
-  editedAt: Date;
-  status: TodoNoteStatus;
-}
-
-interface ITodoNote {
   markAsCompleted: () => void;
-  edit: (title?: string, content?: string) => void;
+  edit: (payload: ITodoNote) => void;
 }
 
 class TodoList implements ITodoList {
-  protected notes: TodoNote[] = [];
+  protected notes: ITodoNote[] = [];
 
-  addNote(note: TodoNote): void {
+  addNote(note: ITodoNote): void {
     this.notes.push(note);
   }
 
@@ -45,22 +41,31 @@ class TodoList implements ITodoList {
     this.notes = this.notes.filter((note) => note.id !== noteId);
   }
 
-  editNote(noteId: string, title?: string, content?: string): void {
-    const [noteToEdit] = this.notes.filter((note) => note.id === noteId);
-    noteToEdit.edit(title, content);
+  editNote(noteId: string, payload: ITodoNote): void {
+    const noteToEdit = this.notes.find((note) => note.id === noteId);
+
+    if (!noteToEdit) throw new Error(`Incorrect note id.`);
+
+    noteToEdit.edit(payload);
   }
 
-  getNoteInfo(noteId: string): ITodoNoteInfo {
-    const [noteToShow] = this.notes.filter((note) => note.id === noteId);
-    return noteToShow.noteInfo;
+  getNoteInfo(noteId: string): ITodoNote {
+    const noteToShow = this.notes.find((note) => note.id === noteId);
+
+    if (!noteToShow) throw new Error(`Incorrect note id.`);
+
+    return noteToShow;
   }
 
-  getAllNotes(): ITodoNoteInfo[] {
-    return this.notes.map((note) => note.noteInfo);
+  getAllNotes(): ITodoNote[] {
+    return this.notes;
   }
 
   markNoteAsCompleted(noteId: string): void {
-    const [noteToMark] = this.notes.filter((note) => note.id === noteId);
+    const noteToMark = this.notes.find((note) => note.id === noteId);
+
+    if (!noteToMark) throw new Error(`Incorrect note id.`);
+
     noteToMark.markAsCompleted();
   }
 
@@ -75,10 +80,10 @@ class TodoList implements ITodoList {
 }
 
 class SearchableTodoList extends TodoList implements ISearchableTodoList {
-  searchNotes(query: string, field?: keyof TodoNote): TodoNote[] {
+  searchNotes(query: string, field?: keyof ITodoNote): ITodoNote[] {
     if (!query.trim()) return this.notes;
 
-    let foundNotes: TodoNote[];
+    let foundNotes: ITodoNote[];
 
     if (field) {
       foundNotes = this.notes.filter((note) => note[field].toString().toLowerCase() === query.toLowerCase());
@@ -95,12 +100,12 @@ class SearchableTodoList extends TodoList implements ISearchableTodoList {
 }
 
 class SortableTodoList extends TodoList implements ISortableTodoList {
-  sortNotesByStatus(): TodoNote[] {
+  sortNotesByStatus(): ITodoNote[] {
     const sortedNotes = [...this.notes].sort((a, b) => (a.status === b.status ? 0 : a.status ? 1 : -1));
     return sortedNotes;
   }
 
-  sortNotesByCreationDate(): TodoNote[] {
+  sortNotesByCreationDate(): ITodoNote[] {
     const sortedNotes = [...this.notes].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     return sortedNotes;
   }
@@ -128,15 +133,12 @@ class TodoNote implements ITodoNote {
     return this._createdAt;
   }
 
-  get noteInfo(): ITodoNoteInfo {
-    return {
-      id: this._id,
-      title: this._title,
-      content: this._content,
-      createdAt: this._createdAt,
-      editedAt: this._editedAt,
-      status: this._status,
-    };
+  get title(): string {
+    return this._title;
+  }
+
+  get content(): string {
+    return this._content;
   }
 
   constructor(title: string, content: string) {
@@ -152,16 +154,8 @@ class TodoNote implements ITodoNote {
     this._status = "completed";
   }
 
-  edit(title?: string, content?: string): void {
-    if (title) {
-      this._title = title;
-      this._editedAt = new Date();
-    }
-
-    if (content) {
-      this._content = content;
-      this._editedAt = new Date();
-    }
+  edit(note: ITodoNote): void {
+    Object.assign(this, note);
   }
 }
 
@@ -171,11 +165,11 @@ class TodoNoteWithEditingConfirmation extends TodoNote {
     return isConfirmed;
   }
 
-  override edit(title?: string, content?: string): void {
+  override edit(note: ITodoNote): void {
     const isConfirmed = this.confirmEditing();
 
     if (isConfirmed) {
-      super.edit(title, content);
+      super.edit(note);
     }
   }
 }
